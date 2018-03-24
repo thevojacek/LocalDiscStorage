@@ -2,6 +2,6 @@
 build
 Packages
 *.pkg
-Kitura-MiniHandlebars.xcodeproj
+LocalDiskStorage.xcodeproj
 *.DS_Store
 Package.resolved
