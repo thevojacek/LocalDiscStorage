@@ -19,8 +19,6 @@ class IndexFileHandler {
             throw IndexFileError.InvalidPath;
         }
         
-        // todo: split into more files if necessary?
-        
         self.indexes = try self.ensureIndexFileExists();
     }
 
@@ -30,12 +28,13 @@ class IndexFileHandler {
             return try self.loadIndexFile();
         }
         
-        var emptyIndexes: Array<StorageIndex> = Array<StorageIndex>();
+        let emptyIndexes: Array<StorageIndex> = Array<StorageIndex>();
         // todo: remove.
-        emptyIndexes.append(StorageIndex(identifier: "AK8901", index: ["Jan"], file: "somefilename.lsData"));
-        emptyIndexes.append(StorageIndex(identifier: "AKKJHKUKJHJ", index: ["Jana", "Hana"], file: "somefilename.lsData"));
+        // emptyIndexes.append(StorageIndex(identifier: "AK8901", index: ["Jan"], file: "somefilename.ldsData"));
+        // emptyIndexes.append(StorageIndex(identifier: "AKKJHKUKJHJ", index: ["Jana", "Hana"], file: "somefilename.ldsData"));
         
-        try self.saveIndexFile(data: emptyIndexes)
+        // Save empty file.
+        try self.saveIndexFile(data: emptyIndexes);
         
         return emptyIndexes;
     }
@@ -56,16 +55,14 @@ class IndexFileHandler {
         let data = try! encoder.encode(data);
         
         // Format into bytes.
-        let bytes = self.dataToFormattedBytesString(data: data);
+        let bytes = data.toFormattedBytesString(bytesPerLine: 32);
         
         do {
             // Save to a file.
             try bytes.write(to: URL(fileURLWithPath: self.filePath), atomically: true, encoding: String.Encoding.utf8);
             
         } catch {
-            print("Error when writing at \(self.filePath)");
-            // todo: throw an error
-            return;
+            throw IndexFileError.FileCouldNotBeSaved;
         }
     }
     
@@ -105,24 +102,6 @@ class IndexFileHandler {
             throw IndexFileError.FileCorrupted;
         }
     }
-    
-    private func dataToFormattedBytesString (data: Data) -> String {
-        
-        var formatted: String = "";
-        
-        for (index, byte) in data.enumerated() {
-
-            if ((index + 1) % 32) == 0 {
-                formatted += "\(byte) \n";
-                continue;
-            }
-            
-            formatted += "\(byte) ";
-            
-        }
-        
-        return formatted;
-    }
 }
 
 
@@ -131,4 +110,5 @@ enum IndexFileError: Error {
     case FileCouldNotBeCreated;
     case FileCouldNotBeLoaded;
     case FileCorrupted;
+    case FileCouldNotBeSaved;
 }

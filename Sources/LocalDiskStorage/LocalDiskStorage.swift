@@ -3,7 +3,7 @@ import Foundation;
 public class LocalDiskStorage {
     
     private let initPath: String;
-    private let memoryLimit: Int;
+    private let fileSizeLimit: Int;
     
     private let indexHandler: IndexFileHandler;
 
@@ -11,37 +11,48 @@ public class LocalDiskStorage {
         get { return self.initPath; }
     }
     
-    init (in path: String) throws {
-        self.initPath = path;
-        self.memoryLimit = 0;
-        self.indexHandler = try IndexFileHandler(path: path); // todo: translate exceptions
+    convenience init (in path: String) throws {
+        try self.init(in: path, withFileSizeLimit: 16_000_000);
     }
     
-    init (in path: String, withMaxMemoryOf memoryLimit: Int) throws {
+    init (in path: String, withFileSizeLimit fileSizeLimit: Int) throws {
         self.initPath = path;
-        self.memoryLimit = memoryLimit;
+        self.fileSizeLimit = fileSizeLimit;
         self.indexHandler = try IndexFileHandler(path: path); // todo: translate exceptions
         
-        // todo: option -> cipher it
+        // todo: option -> cipher it?
     }
     
     public func save (identifier: String, value: [String: Any]) throws {
         // todo: implement
         
-        let jsonData: Data = try JSONSerialization.data(withJSONObject: value);
+        /*let jsonData: Data = try JSONSerialization.data(withJSONObject: value);
         var bytes: String = "";
         
         jsonData.forEach { (byte) in
             bytes += "\(byte) ";
-        }
+        }*/
+
+        let entity: StorageValue = StorageValue(identifier: identifier, storeValue: value);
         
-        // todo: SAVE BYTES AS STRING
-        // todo: pick a file ?
+        let json = """
+            {
+                "identifier": "id1337",
+                "storeValue": { "one": 10, "two": 20 }
+            }
+        """.data(using: .utf8)!;
         
-        // todo: file handler class for file saving
+        let m = try JSONDecoder().decode(StorageValue.self, from: json);
         
-        print("Saving \(identifier).");
-        print(bytes);
+        print(m.storeValue);
+        print(entity.storeValue);
+        
+        // create entity for saving
+        // pick a file -> file handler
+        // file handler class for file saving -> file handler
+        // create an index
+        
+        //print("Saving \(entity.identifier).");
     }
     
 }
