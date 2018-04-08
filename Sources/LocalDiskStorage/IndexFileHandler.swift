@@ -29,9 +29,6 @@ class IndexFileHandler {
         }
         
         let emptyIndexes: Array<StorageIndex> = Array<StorageIndex>();
-        // todo: remove.
-        // emptyIndexes.append(StorageIndex(identifier: "AK8901", index: ["Jan"], file: "somefilename.ldsData"));
-        // emptyIndexes.append(StorageIndex(identifier: "AKKJHKUKJHJ", index: ["Jana", "Hana"], file: "somefilename.ldsData"));
         
         // Save empty file.
         try self.saveIndexFile(data: emptyIndexes);
@@ -101,6 +98,19 @@ class IndexFileHandler {
         } catch {
             throw IndexFileError.FileCorrupted;
         }
+    }
+    
+    public func getListOfAllFiles () -> Set<String> {
+        
+        var set = Set<String>();
+        
+        for index in self.indexes {
+            if !set.contains(index.file) {
+                set.insert(index.file);
+            }
+        }
+        
+        return set;
     }
 }
 

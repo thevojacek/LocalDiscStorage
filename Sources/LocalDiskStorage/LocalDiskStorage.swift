@@ -6,6 +6,7 @@ public class LocalDiskStorage {
     private let fileSizeLimit: Int;
     
     private let indexHandler: IndexFileHandler;
+    private let fileHandler: FileStorageHandler;
 
     public var path: String {
         get { return self.initPath; }
@@ -18,46 +19,67 @@ public class LocalDiskStorage {
     init (in path: String, withFileSizeLimit fileSizeLimit: Int) throws {
         self.initPath = path;
         self.fileSizeLimit = fileSizeLimit;
-        self.indexHandler = try IndexFileHandler(path: path); // todo: translate exceptions
-        
-        // todo: option -> cipher it?
+        self.indexHandler = try IndexFileHandler(path: path); // todo: translate exceptions?
+        self.fileHandler = try FileStorageHandler(path: path); // todo: translate exceptions?
     }
     
     public func save (identifier: String, value: [String: Any]) throws {
-        // todo: implement
-        
-        /*let jsonData: Data = try JSONSerialization.data(withJSONObject: value);
-        var bytes: String = "";
-        
-        jsonData.forEach { (byte) in
-            bytes += "\(byte) ";
-        }*/
 
         let entity: StorageValue = StorageValue(identifier: identifier, storeValue: value);
+        let fileToSave: String = self.getFileNameToSave();
         
-        let json = """
-            {
-                "identifier": "id1337",
-                "storeValue": { "one": 10, "two": 20 }
-            }
-        """.data(using: .utf8)!;
+        try self.fileHandler.saveTo(data: entity, toFile: fileToSave);
         
-        let m = try JSONDecoder().decode(StorageValue.self, from: json);
-        
-        print(m.storeValue);
-        print(entity.storeValue);
-        
-        // create entity for saving
-        // pick a file -> file handler
         // file handler class for file saving -> file handler
-        // create an index
-        
-        //print("Saving \(entity.identifier).");
+        // create an index -> file index handler
     }
     
+    private func getFileNameToSave () -> String {
+
+        let allFileNames = self.indexHandler.getListOfAllFiles();
+        
+        if allFileNames.count == 0 {
+            return self.generateNewFileName();
+        }
+        
+        for fileName in allFileNames {
+            do {
+                if try FileStorageHandler.getFileSize(fileName) < UInt(self.fileSizeLimit) {
+                    return fileName;
+                }
+            } catch { continue; }
+        }
+        
+        return self.generateNewFileName(allFileNames.count);
+    }
+    
+    private func generateNewFileName (_ count: Int = 0) -> String {
+        
+        var count: Int = count;
+        var matched: Bool = false;
+        var name: String = "data_\(count).ldsData";
+        var iterations: Int = 0;
+        
+        while (!matched) {
+            name = "data_\(count).ldsData";
+            
+            if !FileStorageHandler.fileExists(name) {
+                matched = true;
+                break;
+            }
+            
+            if iterations > 999 {
+                name = "data_\(arc4random_uniform(UInt32(1_000_000))).ldsData";
+                if !FileStorageHandler.fileExists(name) {
+                    matched = true;
+                    break;
+                }
+            }
+            
+            count += 1;
+            iterations += 1;
+        }
+        
+        return name;
+    }
 }
-
-
-
-
-
