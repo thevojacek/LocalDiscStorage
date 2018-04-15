@@ -74,7 +74,6 @@ class IndexFileHandler {
             throw IndexFileError.FileCouldNotBeLoaded;
         }
         
-        // Remove new lines for parsing bytes.
         fileContent.removeNewLines();
         
         // Get Bytes.
@@ -87,7 +86,7 @@ class IndexFileHandler {
                     throw IndexFileError.FileCorrupted;
                 }
                 return UInt8(component)!;
-            };
+        };
         
         // Decode with JSONDecoder and convert to array of "StorageIndex".
         let fileData = Data(bytes: bytes);
@@ -98,6 +97,11 @@ class IndexFileHandler {
         } catch {
             throw IndexFileError.FileCorrupted;
         }
+    }
+    
+    public func createIndex (_ index: StorageIndex) throws -> Void {
+        self.indexes.append(index);
+        try self.saveIndexFile(data: self.indexes);
     }
     
     public func getListOfAllFiles () -> Set<String> {

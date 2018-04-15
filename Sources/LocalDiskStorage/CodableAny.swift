@@ -1,5 +1,5 @@
 class CodableAny: Codable {
-    public let value: Any;
+    public var value: Any;
     
     static func decodingError(forCodingPath codingPath: [CodingKey]) -> DecodingError {
         let context = DecodingError.Context(codingPath: codingPath, debugDescription: "Cannot decode CodableAny")
@@ -16,6 +16,9 @@ class CodableAny: Codable {
             return value
         }
         if let value = try? container.decode(Int64.self) {
+            return value
+        }
+        if let value = try? container.decode(Int.self) {
             return value
         }
         if let value = try? container.decode(Double.self) {
@@ -35,6 +38,9 @@ class CodableAny: Codable {
             return value
         }
         if let value = try? container.decode(Int64.self) {
+            return value
+        }
+        if let value = try? container.decode(Int.self) {
             return value
         }
         if let value = try? container.decode(Double.self) {
@@ -62,6 +68,9 @@ class CodableAny: Codable {
             return value
         }
         if let value = try? container.decode(Int64.self, forKey: key) {
+            return value
+        }
+        if let value = try? container.decode(Int.self, forKey: key) {
             return value
         }
         if let value = try? container.decode(Double.self, forKey: key) {
@@ -108,6 +117,8 @@ class CodableAny: Codable {
                 try container.encode(value)
             } else if let value = value as? Int64 {
                 try container.encode(value)
+            } else if let value = value as? Int {
+                try container.encode(value)
             } else if let value = value as? Double {
                 try container.encode(value)
             } else if let value = value as? String {
@@ -127,11 +138,13 @@ class CodableAny: Codable {
     }
     
     static func encode(to container: inout KeyedEncodingContainer<CodableAnyKey>, dictionary: [String: Any]) throws {
-        for (key, value) in dictionary {
+        for (key, value) in dictionary { // todo: fix for all possible types!!!
             let key = CodableAnyKey(stringValue: key)!
             if let value = value as? Bool {
                 try container.encode(value, forKey: key)
             } else if let value = value as? Int64 {
+                try container.encode(value, forKey: key)
+            } else if let value = value as? Int {
                 try container.encode(value, forKey: key)
             } else if let value = value as? Double {
                 try container.encode(value, forKey: key)
@@ -156,6 +169,8 @@ class CodableAny: Codable {
             try container.encode(value)
         } else if let value = value as? Int64 {
             try container.encode(value)
+        } else if let value = value as? Int {
+            try container.encode(value)
         } else if let value = value as? Double {
             try container.encode(value)
         } else if let value = value as? String {
@@ -178,8 +193,8 @@ class CodableAny: Codable {
         }
     }
     
-    public required init () {
-        self.value = "";
+    public required init (_ value: Any?) {
+        self.value = value ?? "";
     }
     
     public func encode(to encoder: Encoder) throws {

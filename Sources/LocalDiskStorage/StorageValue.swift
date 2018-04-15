@@ -7,7 +7,14 @@ class StorageValue: CodableAny {
     var storeValue: [String: Any] = [String: Any]();
     
     public init (identifier: String, storeValue: [String: Any]) {
-        super.init();
+        
+        let value = [
+            "identifier": identifier,
+            "storeValue": storeValue
+            ] as [String : Any];
+        
+        super.init(value);
+        
         self.identifier = identifier;
         self.storeValue = storeValue;
     }
@@ -23,8 +30,8 @@ class StorageValue: CodableAny {
         self.storeValue = value["storeValue"] as! [String : Any];
     }
     
-    public required init () {
-        super.init();
+    public required init (_ value: Any?) {
+        super.init(value);
     }
 }
 

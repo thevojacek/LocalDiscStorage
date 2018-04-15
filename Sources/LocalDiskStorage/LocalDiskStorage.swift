@@ -17,21 +17,21 @@ public class LocalDiskStorage {
     }
     
     init (in path: String, withFileSizeLimit fileSizeLimit: Int) throws {
-        self.initPath = path;
+        self.initPath = path.last == "/" ? path : "\(path)/";
         self.fileSizeLimit = fileSizeLimit;
         self.indexHandler = try IndexFileHandler(path: path); // todo: translate exceptions?
         self.fileHandler = try FileStorageHandler(path: path); // todo: translate exceptions?
     }
     
-    public func save (identifier: String, value: [String: Any]) throws {
-
-        let entity: StorageValue = StorageValue(identifier: identifier, storeValue: value);
+    public func save (identifier: String, value: [String: Any], index: Array<String>?) throws -> Void {
+        
+        let index = index ?? Array<String>();
         let fileToSave: String = self.getFileNameToSave();
+        let entity: StorageValue = StorageValue(identifier: identifier, storeValue: value);
+        let entityIndex: StorageIndex = StorageIndex(identifier: identifier, index: index, file: fileToSave);
         
         try self.fileHandler.saveTo(data: entity, toFile: fileToSave);
-        
-        // file handler class for file saving -> file handler
-        // create an index -> file index handler
+        try self.indexHandler.createIndex(entityIndex);
     }
     
     private func getFileNameToSave () -> String {
@@ -44,7 +44,7 @@ public class LocalDiskStorage {
         
         for fileName in allFileNames {
             do {
-                if try FileStorageHandler.getFileSize(fileName) < UInt(self.fileSizeLimit) {
+                if try FileStorageHandler.getFileSize("\(self.path)\(fileName)") < UInt(self.fileSizeLimit) {
                     return fileName;
                 }
             } catch { continue; }
@@ -63,14 +63,14 @@ public class LocalDiskStorage {
         while (!matched) {
             name = "data_\(count).ldsData";
             
-            if !FileStorageHandler.fileExists(name) {
+            if !FileStorageHandler.fileExists(atPath: "\(self.path)\(name)") {
                 matched = true;
                 break;
             }
             
             if iterations > 999 {
                 name = "data_\(arc4random_uniform(UInt32(1_000_000))).ldsData";
-                if !FileStorageHandler.fileExists(name) {
+                if !FileStorageHandler.fileExists(atPath: "\(self.path)\(name)") {
                     matched = true;
                     break;
                 }

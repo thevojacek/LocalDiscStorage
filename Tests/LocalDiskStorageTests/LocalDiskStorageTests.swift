@@ -18,10 +18,14 @@ class LocalDiskStorageTests: XCTestCase {
             let storage = try LocalDiskStorage(in: desktopURL);
             let dataToStore: [String: Int] = [
                 "Helen": 1289,
-                "Jan": 3780
+                "Jan": 3780,
+                "Leet": 1337
             ];
+            let index = ["Helen", "Jan", "Leet"];
             
-            try storage.save(identifier: "AK09W34", value: dataToStore);
+            try storage.save(identifier: "AK09W34", value: dataToStore, index: index);
+            try storage.save(identifier: "CK19E37", value: ["mobilePhone": "iPhone 7 Plus, JetBlack, 128GB"], index: nil);
+            try storage.save(identifier: "CE12E37", value: ["notebook": "MacBook Pro 2016, 13inch"], index: nil);
             
             print(storage.path);
             

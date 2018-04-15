@@ -13,24 +13,76 @@ class FileStorageHandler {
         }
     }
     
-    public func saveTo (data: StorageValue, toFile fileName: String) throws {
+    public func saveTo (data: StorageValue, toFile fileName: String) throws -> Void {
 
-        // let fileContent: Array<StorageValue> = Array<StorageValue>();
-        print(data.identifier);
-        print(data.storeValue);
-        print(fileName);
+        let filePath: String = "\(self.path)\(fileName)";
+        var fileContent: Array<StorageValue> = FileStorageHandler.fileExists(atPath: filePath)
+            ? try self.loadFile(fileName)
+            : Array<StorageValue>();
+
+        fileContent.append(data);
+
+        try self.saveFile(withName: fileName, withContent: fileContent);
         
-        if FileStorageHandler.fileExists(fileName) {
-            // todo: load file and overwrite "fileContent"
-            // load in different method
-        }
+        // Reset fileContent for faster memory release.
+        fileContent = Array<StorageValue>();
     }
     
     private func loadFile (_ fileName: String) throws -> Array<StorageValue> {
+
+        var fileContent: String;
+        let fileUrl: URL = URL(fileURLWithPath: "\(self.path)\(fileName)");
         
-        // todo: implement
+        do {
+            // Load a file.
+            fileContent = try String(contentsOf: fileUrl, encoding: String.Encoding.utf8);
+        } catch {
+            throw FileStorageError.FileCouldNotBeLoaded;
+        }
         
-        return Array<StorageValue>();
+        fileContent.removeNewLines();
+
+        // Get Bytes.
+        let bytes: Array<UInt8> = try fileContent.components(separatedBy: " ")
+            .filter({ (component) -> Bool in
+                return component != "";
+            })
+            .map { (component) in
+                if !component.isNumeric() || Double(component)! < 0.0 || Double(component)! > 255.0 {
+                    throw IndexFileError.FileCorrupted;
+                }
+                return UInt8(component)!;
+        };
+        
+        // Decode with JSONDecoder and convert to array of "StorageIndex".
+        let fileData = Data(bytes: bytes);
+        let decoder = JSONDecoder();
+        
+        do {
+            return try decoder.decode(Array<StorageValue>.self, from: fileData);
+        } catch {
+            throw FileStorageError.FileCorrupted;
+        }
+    }
+    
+    private func saveFile (withName fileName: String, withContent content: Array<StorageValue>) throws -> Void {
+        
+        let fileUrl: URL = URL(fileURLWithPath: "\(self.path)\(fileName)");
+        
+        // Encode.
+        let encoder = JSONEncoder();
+        let data = try! encoder.encode(content);
+        
+        // Format into bytes.
+        let bytes = data.toFormattedBytesString(bytesPerLine: 32);
+        
+        do {
+            // Save to a file.
+            try bytes.write(to: fileUrl, atomically: true, encoding: String.Encoding.utf8);
+            
+        } catch {
+            throw IndexFileError.FileCouldNotBeSaved;
+        }
     }
     
     public static func getFileSize (_ filePath: String) throws -> UInt {
@@ -52,13 +104,14 @@ class FileStorageHandler {
         return FileManager().fileExists(atPath: path, isDirectory: &isDir);
     }
     
-    public static func fileExists (_ filePath: String) -> Bool {
+    public static func fileExists (atPath filePath: String) -> Bool {
         return FileManager().fileExists(atPath: filePath);
     }
-    
 }
 
 enum FileStorageError: Error {
     case InvalidPath;
     case FileNotExists;
+    case FileCouldNotBeLoaded;
+    case FileCorrupted;
 }
