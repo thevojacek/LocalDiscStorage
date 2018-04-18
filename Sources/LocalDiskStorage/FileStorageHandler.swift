@@ -16,9 +16,11 @@ class FileStorageHandler {
     public func saveTo (data: StorageValue, toFile fileName: String) throws -> Void {
 
         let filePath: String = "\(self.path)\(fileName)";
-        var fileContent: Array<StorageValue> = FileStorageHandler.fileExists(atPath: filePath)
-            ? try self.loadFile(fileName)
-            : Array<StorageValue>();
+        var fileContent: Array<StorageValue> = Array<StorageValue>()
+        
+        if FileStorageHandler.fileExists(atPath: filePath) {
+            fileContent = try self.loadFile(fileName);
+        }
 
         fileContent.append(data);
 
@@ -26,6 +28,24 @@ class FileStorageHandler {
         
         // Reset fileContent for faster memory release.
         fileContent = Array<StorageValue>();
+    }
+    
+    public func loadItem (withId identifier: String, fromFile fileName: String) throws -> StorageValue? {
+
+        var loadedItem: StorageValue? = nil;
+        var fileContent: Array<StorageValue> = try self.loadFile(fileName);
+        
+        for item in fileContent {
+            if item.identifier == identifier {
+                loadedItem = item;
+                break;
+            }
+        }
+        
+        // For faster memory release.
+        fileContent = Array<StorageValue>();
+        
+        return loadedItem;
     }
     
     private func loadFile (_ fileName: String) throws -> Array<StorageValue> {

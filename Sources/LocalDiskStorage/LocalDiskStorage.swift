@@ -25,6 +25,9 @@ public class LocalDiskStorage {
     
     public func save (identifier: String, value: [String: Any], index: Array<String>?) throws -> Void {
         
+        // todo: implement unique identifier??
+        // todo: implement method for unique identifier testing?
+        
         let index = index ?? Array<String>();
         let fileToSave: String = self.getFileNameToSave();
         let entity: StorageValue = StorageValue(identifier: identifier, storeValue: value);
@@ -32,6 +35,19 @@ public class LocalDiskStorage {
         
         try self.fileHandler.saveTo(data: entity, toFile: fileToSave);
         try self.indexHandler.createIndex(entityIndex);
+    }
+    
+    public func load (withId identifier: String) throws -> [String: Any]? {
+
+        guard let index: StorageIndex = try self.indexHandler.getIndex(identifier) else {
+            return nil;
+        }
+        
+        guard let item: StorageValue = try self.fileHandler.loadItem(withId: identifier, fromFile: index.file) else {
+            return nil;
+        };
+
+        return item.storeValue;
     }
     
     private func getFileNameToSave () -> String {

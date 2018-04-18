@@ -27,6 +27,9 @@ class LocalDiskStorageTests: XCTestCase {
             try storage.save(identifier: "CK19E37", value: ["mobilePhone": "iPhone 7 Plus, JetBlack, 128GB"], index: nil);
             try storage.save(identifier: "CE12E37", value: ["notebook": "MacBook Pro 2016, 13inch"], index: nil);
             
+            let item = try storage.load(withId: "CK19E37");
+            
+            print(item!);
             print(storage.path);
             
         } catch {

@@ -104,6 +104,17 @@ class IndexFileHandler {
         try self.saveIndexFile(data: self.indexes);
     }
     
+    public func getIndex (_ identifier: String) throws -> StorageIndex? {
+        
+        for index in self.indexes {
+            if index.identifier == identifier {
+                return index;
+            }
+        }
+        
+        return nil;
+    }
+    
     public func getListOfAllFiles () -> Set<String> {
         
         var set = Set<String>();
