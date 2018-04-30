@@ -50,6 +50,27 @@ public class LocalDiskStorage {
         return item.storeValue;
     }
     
+    public func find (withIndexes indexes: Array<String>) throws -> Array<[String: Any]>? {
+
+        guard let fileIndexes = try self.indexHandler.findIndexes(indexes) else {
+            return nil;
+        }
+        
+        let groupedFiles = self.getGroupedItemsFromIndexes(fileIndexes);
+        var loadedItems: Array<[String: Any]> = Array<[String: Any]>();
+        
+        for group in groupedFiles {
+            
+            let items = try self.fileHandler.loadItems(withIds: group.itemIdentifiers, fromFile: group.fileName);
+            
+            if items != nil {
+                items?.forEach({ (item) in loadedItems.append(item.storeValue) });
+            }
+        }
+        
+        return loadedItems.count > 0 ? loadedItems : nil;
+    }
+    
     private func getFileNameToSave () -> String {
 
         let allFileNames = self.indexHandler.getListOfAllFiles();
@@ -98,4 +119,32 @@ public class LocalDiskStorage {
         
         return name;
     }
+    
+    private func getGroupedItemsFromIndexes (_ fileIndexes: Array<StorageIndex>) -> Array<GroupedItems> {
+        
+        return fileIndexes.reduce(Array<GroupedItems>()) { (groupedItems, index) -> Array<GroupedItems> in
+            
+            var groupedItems = groupedItems;
+            let groupedItemIndex = groupedItems.index(where: { (item) -> Bool in
+                return item.fileName == index.file;
+            });
+            
+            if groupedItemIndex == nil {
+                groupedItems.append(GroupedItems(fileName: index.file, itemIdentifiers: [index.identifier]));
+                return groupedItems;
+            }
+
+            groupedItems[groupedItemIndex!].itemIdentifiers.append(index.identifier);
+            
+            return groupedItems;
+        };
+    }
 }
+
+// todo: move to a separate file?
+struct GroupedItems {
+    public let fileName: String;
+    public var itemIdentifiers: Array<String>;
+}
+
+

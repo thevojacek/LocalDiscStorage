@@ -115,6 +115,22 @@ class IndexFileHandler {
         return nil;
     }
     
+    public func findIndexes (_ indexes: Array<String>) throws -> Array<StorageIndex>? {
+        
+        var matchedIndexes: Array<StorageIndex> = Array<StorageIndex>();
+
+        for fileIndex in self.indexes {
+            for index in fileIndex.index {
+                if indexes.contains(index) {
+                    matchedIndexes.append(fileIndex);
+                    break;
+                }
+            }
+        }
+        
+        return (matchedIndexes.count > 0) ? matchedIndexes : nil;
+    }
+    
     public func getListOfAllFiles () -> Set<String> {
         
         var set = Set<String>();

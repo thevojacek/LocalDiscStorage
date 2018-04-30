@@ -30,6 +30,31 @@ class FileStorageHandler {
         fileContent = Array<StorageValue>();
     }
     
+    public func loadItems (withIds identifiers: Array<String>, fromFile fileName: String) throws -> Array<StorageValue>? {
+        
+        // todo: merge with loadItem!! (uses similar logic)
+        
+        var loadedItems: Array<StorageValue> = Array<StorageValue>();
+        var fileContent: Array<StorageValue> = try self.loadFile(fileName);
+
+        for item in fileContent {
+            
+            if identifiers.contains(item.identifier) {
+                loadedItems.append(item);
+            }
+            
+            // Speeds-up this loop.
+            if identifiers.count <= loadedItems.count {
+                break;
+            }
+        }
+        
+        // For faster memory release.
+        fileContent = Array<StorageValue>();
+        
+        return loadedItems.count > 0 ? loadedItems : nil;
+    }
+    
     public func loadItem (withId identifier: String, fromFile fileName: String) throws -> StorageValue? {
 
         var loadedItem: StorageValue? = nil;
