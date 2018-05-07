@@ -23,10 +23,25 @@ public class LocalDiskStorage {
         self.fileHandler = try FileStorageHandler(path: path); // todo: translate exceptions?
     }
     
-    public func save (identifier: String, value: [String: Any], index: Array<String>?) throws -> Void {
-        
-        // todo: implement unique identifier??
-        // todo: implement method for unique identifier testing?
+    /// Function to permanently save your data. Creates and index and returns an identifier of a stored item.
+    ///
+    /// - Parameters:
+    ///   - identifier: String to be used as an identifier. Throws an error if not unique.
+    ///   - value: Value to be stored.
+    ///   - index: Array of values to be used as an index for lookup.
+    /// - Returns: Identifier of a stored item.
+    /// - Throws: Throws errors.
+    public func save (identifier: String?, value: [String: Any], index: Array<String>?) throws -> String {
+
+        // Generate identifier if not present.
+        let identifier: String = identifier != nil
+            ? identifier!
+            : IdentifierGenerator.generator.generateUniqueIdentifier(self.indexHandler.getAllIdentifiers());
+
+        // Check identifier uniqueness.
+        if self.indexHandler.identifierExists(identifier) {
+            throw LocalDiscStorageError.DuplicateIdentifier;
+        }
         
         let index = index ?? Array<String>();
         let fileToSave: String = self.getFileNameToSave();
@@ -35,6 +50,8 @@ public class LocalDiskStorage {
         
         try self.fileHandler.saveTo(data: entity, toFile: fileToSave);
         try self.indexHandler.createIndex(entityIndex);
+        
+        return identifier;
     }
     
     public func load (withId identifier: String) throws -> [String: Any]? {
@@ -141,10 +158,12 @@ public class LocalDiskStorage {
     }
 }
 
+enum LocalDiscStorageError: Error {
+    case DuplicateIdentifier;
+}
+
 // todo: move to a separate file?
 struct GroupedItems {
     public let fileName: String;
     public var itemIdentifiers: Array<String>;
 }
-
-

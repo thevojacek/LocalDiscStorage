@@ -143,6 +143,21 @@ class IndexFileHandler {
         
         return set;
     }
+    
+    public func getAllIdentifiers () -> Array<String> {
+        return self.indexes.map { (index) -> String in
+            return index.identifier;
+        }
+    }
+    
+    public func identifierExists (_ identifier: String) -> Bool {
+        
+        let index = self.indexes.first { (index) -> Bool in
+            return index.identifier == identifier;
+        }
+        
+        return index == nil ? false : true;
+    }
 }
 
 
