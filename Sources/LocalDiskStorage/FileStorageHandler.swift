@@ -13,6 +13,12 @@ class FileStorageHandler {
         }
     }
     
+    /// Saves object into given file.
+    ///
+    /// - Parameters:
+    ///   - data: Data to store.
+    ///   - fileName: Name of a wile to which to write.
+    /// - Throws: Throws errors.
     public func saveTo (data: StorageValue, toFile fileName: String) throws -> Void {
 
         let filePath: String = "\(self.path)\(fileName)";
@@ -30,6 +36,13 @@ class FileStorageHandler {
         fileContent = Array<StorageValue>();
     }
     
+    /// Loads items with given identifiers from a specified file.
+    ///
+    /// - Parameters:
+    ///   - identifiers: Identifiers of object to load.
+    ///   - fileName: File name from which to load.
+    /// - Returns: Array of values.
+    /// - Throws: Throws errors.
     public func loadItems (withIds identifiers: Array<String>, fromFile fileName: String) throws -> Array<StorageValue>? {
         
         // todo: merge with loadItem!! (uses similar logic)
@@ -55,6 +68,13 @@ class FileStorageHandler {
         return loadedItems.count > 0 ? loadedItems : nil;
     }
     
+    /// Loads single object from a file.
+    ///
+    /// - Parameters:
+    ///   - identifier: Identifier of a object to load.
+    ///   - fileName: File name from which to load.
+    /// - Returns: Returns requested object.
+    /// - Throws: Throws errors.
     public func loadItem (withId identifier: String, fromFile fileName: String) throws -> StorageValue? {
 
         var loadedItem: StorageValue? = nil;
@@ -130,6 +150,11 @@ class FileStorageHandler {
         }
     }
     
+    /// Gets size of a specified file.
+    ///
+    /// - Parameter filePath: File path.
+    /// - Returns: Returns file size as UInt in bytes.
+    /// - Throws: Throws errors.
     public static func getFileSize (_ filePath: String) throws -> UInt {
         do {
             let fileAttributes: [FileAttributeKey : Any] = try FileManager().attributesOfItem(atPath: filePath);

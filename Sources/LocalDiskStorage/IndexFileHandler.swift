@@ -22,6 +22,10 @@ class IndexFileHandler {
         self.indexes = try self.ensureIndexFileExists();
     }
 
+    /// Ensures that index file exists, if not, creates a new one.
+    ///
+    /// - Returns: Returns a content of the index file.
+    /// - Throws: Throws errors.
     private func ensureIndexFileExists () throws -> Array<StorageIndex> {
 
         if self.indexFileExists() {
@@ -35,16 +39,20 @@ class IndexFileHandler {
         
         return emptyIndexes;
     }
-    
+
     private func validPath () -> Bool {
         var isDir: ObjCBool = true;
         return FileManager().fileExists(atPath: self.path, isDirectory: &isDir);
     }
-    
+
     private func indexFileExists () -> Bool {
         return FileManager().fileExists(atPath: self.filePath);
     }
     
+    /// Saves index file with a given data.
+    ///
+    /// - Parameter data: Array of "StorageIndex" which should be saved into index file.
+    /// - Throws: Throws errors.
     private func saveIndexFile (data: Array<StorageIndex>) throws {
         
         // Encode "StorageIndex" data with JSONEncoder.
@@ -63,6 +71,10 @@ class IndexFileHandler {
         }
     }
     
+    /// Loads index file.
+    ///
+    /// - Returns: Returns parsed content of the index file.
+    /// - Throws: Throws errors.
     private func loadIndexFile () throws -> Array<StorageIndex> {
         
         var fileContent: String;
@@ -99,11 +111,23 @@ class IndexFileHandler {
         }
     }
     
+    /// Creates a new index.
+    ///
+    /// - Parameter index: New storage index to create and save.
+    /// - Throws: Throws errors.
     public func createIndex (_ index: StorageIndex) throws -> Void {
+        
+        // todo: check identifier uniqueness even here (getAllIdentifiers method)??
+        
         self.indexes.append(index);
         try self.saveIndexFile(data: self.indexes);
     }
     
+    /// Gets an index by object identifier.
+    ///
+    /// - Parameter identifier: Identifier in form of string.
+    /// - Returns: Returns index or nil.
+    /// - Throws: Throws errors.
     public func getIndex (_ identifier: String) throws -> StorageIndex? {
         
         for index in self.indexes {
@@ -115,6 +139,11 @@ class IndexFileHandler {
         return nil;
     }
     
+    /// Gets all indexes which match the index values (array of strings).
+    ///
+    /// - Parameter indexes: Array of string indexes.
+    /// - Returns: Returns array of "StorageIndex".
+    /// - Throws: Throws errors.
     public func findIndexes (_ indexes: Array<String>) throws -> Array<StorageIndex>? {
         
         var matchedIndexes: Array<StorageIndex> = Array<StorageIndex>();
@@ -131,6 +160,9 @@ class IndexFileHandler {
         return (matchedIndexes.count > 0) ? matchedIndexes : nil;
     }
     
+    /// Gets list of all unique files that can be found in index file.
+    ///
+    /// - Returns: Returns set of file names.
     public func getListOfAllFiles () -> Set<String> {
         
         var set = Set<String>();
@@ -144,12 +176,19 @@ class IndexFileHandler {
         return set;
     }
     
+    /// Returns all existing identifiers.
+    ///
+    /// - Returns: All existing identifiers.
     public func getAllIdentifiers () -> Array<String> {
         return self.indexes.map { (index) -> String in
             return index.identifier;
         }
     }
     
+    /// Checks, if given identifier exists.
+    ///
+    /// - Parameter identifier: Identifier in a form of string.
+    /// - Returns: Returns boolean indicating whether object with given identifier exists.
     public func identifierExists (_ identifier: String) -> Bool {
         
         let index = self.indexes.first { (index) -> Bool in

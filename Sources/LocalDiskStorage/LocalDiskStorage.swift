@@ -54,6 +54,11 @@ public class LocalDiskStorage {
         return identifier;
     }
     
+    /// Method to load specified stored data by it`s identifier.
+    ///
+    /// - Parameter identifier: Identifier of a stored object.
+    /// - Returns: Returns stored value or nil.
+    /// - Throws: Throws errors.
     public func load (withId identifier: String) throws -> [String: Any]? {
 
         guard let index: StorageIndex = try self.indexHandler.getIndex(identifier) else {
@@ -67,6 +72,11 @@ public class LocalDiskStorage {
         return item.storeValue;
     }
     
+    /// Method to find objects by matching list of indexes.
+    ///
+    /// - Parameter indexes: Array of indexes by which to look-up objects.
+    /// - Returns: Returns array of found stored objects.
+    /// - Throws: Throws errors.
     public func find (withIndexes indexes: Array<String>) throws -> Array<[String: Any]>? {
 
         guard let fileIndexes = try self.indexHandler.findIndexes(indexes) else {
@@ -88,6 +98,9 @@ public class LocalDiskStorage {
         return loadedItems.count > 0 ? loadedItems : nil;
     }
     
+    /// Private method to resolve to which file should new object be stored.
+    ///
+    /// - Returns: Returns name of a new or an existing file.
     private func getFileNameToSave () -> String {
 
         let allFileNames = self.indexHandler.getListOfAllFiles();
@@ -107,6 +120,10 @@ public class LocalDiskStorage {
         return self.generateNewFileName(allFileNames.count);
     }
     
+    /// Private method to generate a new unique name for a newly created file.
+    ///
+    /// - Parameter count: A count of already existing files in the storage.
+    /// - Returns: Returns new unique filename.
     private func generateNewFileName (_ count: Int = 0) -> String {
         
         var count: Int = count;
@@ -137,6 +154,11 @@ public class LocalDiskStorage {
         return name;
     }
     
+    /// Groups file indexes by file in which object they point-out to are located.
+    /// It speeds up a loading process because it can derive all objects from a file at once.
+    ///
+    /// - Parameter fileIndexes: File indexes to group by.
+    /// - Returns: Returns array of grouped items to be used to load files one by one.
     private func getGroupedItemsFromIndexes (_ fileIndexes: Array<StorageIndex>) -> Array<GroupedItems> {
         
         return fileIndexes.reduce(Array<GroupedItems>()) { (groupedItems, index) -> Array<GroupedItems> in
