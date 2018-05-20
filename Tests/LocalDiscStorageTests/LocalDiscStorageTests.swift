@@ -1,7 +1,16 @@
 import XCTest;
 @testable import LocalDiscStorage;
 
-class LocalDiskStorageTests: XCTestCase {
+class LocalDiscStorageTests: XCTestCase {
+    
+    /*
+    private let storage: LocalDiscStorage?;
+    
+    override init () {
+        let desktopURL = "/Users/janvojacek/Desktop";
+        self.storage = try LocalDiscStorage(in: desktopURL);
+    }
+    */
     
     func testExample() {
         // This is an example of a functional test case.
@@ -15,7 +24,7 @@ class LocalDiskStorageTests: XCTestCase {
             let desktopURL = "/Users/janvojacek/Desktop";
             
             // let storage = try LocalDiskStorage(in: URL(fileURLWithPath: fileManager.currentDirectoryPath));
-            let storage = try LocalDiskStorage(in: desktopURL);
+            let storage = try LocalDiscStorage(in: desktopURL);
             let dataToStore: [String: Int] = [
                 "Helen": 1289,
                 "Jan": 3780,

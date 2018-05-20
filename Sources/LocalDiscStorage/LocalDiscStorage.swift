@@ -1,6 +1,6 @@
 import Foundation;
 
-public class LocalDiskStorage {
+public class LocalDiscStorage {
     
     private let initPath: String;
     private let fileSizeLimit: Int;
