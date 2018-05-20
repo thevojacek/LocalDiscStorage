@@ -2,6 +2,6 @@
 build
 Packages
 *.pkg
-LocalDiskStorage.xcodeproj
+LocalDiscStorage.xcodeproj
 *.DS_Store
 Package.resolved
