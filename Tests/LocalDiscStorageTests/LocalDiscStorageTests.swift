@@ -19,7 +19,6 @@ class LocalDiscStorageTests: XCTestCase {
             
             for fileName in contents {
                 let filePath = "\(path)/\(fileName)"
-                print(filePath)
                 
                 if fileName.hasSuffix(".ldsData") && fileManager.isDeletableFile(atPath: filePath) {
                     try fileManager.removeItem(atPath: filePath)
