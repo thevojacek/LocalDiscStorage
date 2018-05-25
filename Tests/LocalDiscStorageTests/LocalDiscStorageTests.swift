@@ -84,52 +84,88 @@ class LocalDiscStorageTests: XCTestCase {
         }
     }
     
-    /*
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
+    func testSaveWithCustomIdentifierAndWithoutIndex () {
         
-        // let fileManager = FileManager();
+        let id: String = "city_brno"
+        let data: [String: Any] = [
+            "City_Name": "Brno",
+            "Citizens": 500_000
+        ]
         
         do {
             
-            let desktopURL = "/Users/janvojacek/Desktop";
+            guard let savedId: String = try self.storage?.save(identifier: id, value: data, index: nil) else {
+                XCTFail("Data was not saved properly.")
+                return
+            }
             
-            // let storage = try LocalDiskStorage(in: URL(fileURLWithPath: fileManager.currentDirectoryPath));
-            let storage = try LocalDiscStorage(in: desktopURL);
-            let dataToStore: [String: Int] = [
-                "Helen": 1289,
-                "Jan": 3780,
-                "Leet": 1337
-            ];
-            let index = ["Helen", "Jan", "Leet"];
-            
-            _ = try storage.save(identifier: "AK09W34", value: dataToStore, index: index);
-            _ = try storage.save(identifier: "CK19E37", value: ["mobilePhone": "iPhone 7 Plus, JetBlack, 128GB"], index: index);
-            _ = try storage.save(identifier: "CE12E37", value: ["notebook": "MacBook Pro 2016, 13inch"], index: nil);
-            _ = try storage.save(identifier: nil, value: ["address": "Boleslavská 1776/2"], index: ["address"])
-            
-            let item = try storage.load(withId: "CK19E37");
-            
-            print(item!);
-            print(storage.path);
-            
-            // Find method -> todo: use a result!
-            let items = try storage.find(withIndexes: ["Jan"]);
-            
-            print(items?.count ?? 0);
+            XCTAssert(savedId == id, "Saved custom ID does not match!")
             
         } catch {
-            print(error.localizedDescription);
+            XCTFail("Unexpected runtime exception during testing.")
+            return
         }
-        
-        //XCTAssertEqual(LocalDiskStorage().text, "Hello, World!")
     }
-    */
+    
+    func testShouldBeAbleToInitializeSecondStorageFromSameIndexFile () {
+        
+        let data: [String: Any] = ["number": 16_000_000]
+        
+        do {
+            
+            guard let id: String = try self.storage?.save(identifier: nil, value: data, index: nil) else {
+                XCTFail("Data was not saved properly.")
+                return
+            }
+            
+            let localStorage: LocalDiscStorage = try LocalDiscStorage(in: self.testPath!)
+            
+            guard let item = try localStorage.load(withId: id) else {
+                XCTFail("Data could not be found.")
+                return
+            }
+            
+            XCTAssert(item["number"] as? Int == data["number"] as? Int, "Saved data does not match!")
+            
+        } catch {
+            XCTFail("Unexpected runtime exception during testing.")
+            return
+        }
+    }
+
+    func testShouldReturnNilWhenTryingToLoadNonExistingItem () {
+        
+        do {
+            
+            let item: [String:Any]? = try self.storage?.load(withId: "some_non_existing_id")
+            
+            XCTAssert(item == nil, "Item must be nil.")
+            
+        } catch {
+            XCTFail("Unexpected runtime exception during testing.")
+            return
+        }
+    }
+    
+    func testShouldReturnNilWhenFindingByNonExistingIndex () {
+        
+        do {
+            
+            let items: [[String:Any]]? = try self.storage?.find(withIndexes: ["non", "existing", "index"])
+            
+            XCTAssert(items == nil, "Items must be nil.")
+            
+        } catch {
+            XCTFail("Unexpected runtime exception during testing.")
+            return
+        }
+    }
 
     static var allTests = [
-        ("testSaveAndLoadFunctionality", testSaveAndLoadFunctionality)
-        // ("testExample", testExample),
+        ("testSaveAndLoadFunctionality", testSaveAndLoadFunctionality),
+        ("testSaveWithCustomIdentifier", testSaveWithCustomIdentifierAndWithoutIndex),
+        ("testShouldBeAbleToInitializeSecondStorageFromSameIndexFile", testShouldBeAbleToInitializeSecondStorageFromSameIndexFile),
+        ("testShouldReturnNilWhenTryingToLoadNonExistingItem", testShouldReturnNilWhenTryingToLoadNonExistingItem),
+        ("testShouldReturnNilWhenFindingByNonExistingIndex", testShouldReturnNilWhenFindingByNonExistingIndex)
     ]
 }
