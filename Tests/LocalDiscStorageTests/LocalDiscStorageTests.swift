@@ -107,6 +107,40 @@ class LocalDiscStorageTests: XCTestCase {
         }
     }
     
+    func testUpdateFunctionality () {
+        
+        let original: [String: Any] = [
+            "name": "Ads Ltd.",
+            "workers": 168
+        ]
+        
+        let update: [String: Any] = [
+            "workers": 205,
+            "city": "London"
+        ]
+        
+        do {
+            
+            guard let id: String = try self.storage?.save(identifier: nil, value: original, index: nil) else {
+                XCTFail("Data was not saved properly.")
+                return
+            }
+            
+            try self.storage?.update(withId: id, withData: update)
+
+            guard let updatedItem = try self.storage?.load(withId: id) else {
+                XCTFail("Data was not loaded properly.")
+                return
+            }
+            
+            XCTAssert(updatedItem["workers"] as? Int == update["workers"] as? Int, "Item was not updated.")
+            
+        } catch {
+            XCTFail("Unexpected runtime exception during testing.")
+            return
+        }
+    }
+    
     func testShouldBeAbleToInitializeSecondStorageFromSameIndexFile () {
         
         let data: [String: Any] = ["number": 16_000_000]
@@ -163,7 +197,8 @@ class LocalDiscStorageTests: XCTestCase {
 
     static var allTests = [
         ("testSaveAndLoadFunctionality", testSaveAndLoadFunctionality),
-        ("testSaveWithCustomIdentifier", testSaveWithCustomIdentifierAndWithoutIndex),
+        ("testSaveWithCustomIdentifierAndWithoutIndex", testSaveWithCustomIdentifierAndWithoutIndex),
+        ("testUpdateFunctionality", testUpdateFunctionality),
         ("testShouldBeAbleToInitializeSecondStorageFromSameIndexFile", testShouldBeAbleToInitializeSecondStorageFromSameIndexFile),
         ("testShouldReturnNilWhenTryingToLoadNonExistingItem", testShouldReturnNilWhenTryingToLoadNonExistingItem),
         ("testShouldReturnNilWhenFindingByNonExistingIndex", testShouldReturnNilWhenFindingByNonExistingIndex)

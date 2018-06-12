@@ -98,6 +98,35 @@ public class LocalDiscStorage {
         return loadedItems.count > 0 ? loadedItems : nil;
     }
     
+    /// This method allows you to update any selected item.
+    ///
+    /// - Parameters:
+    ///   - identifier: Identifier of an updated item.
+    ///   - update: An update object to me merged with an original one.
+    /// - Returns: Void
+    /// - Throws: Throws error.
+    public func update (withId identifier: String, withData update: [String: Any]) throws -> Void {
+
+        guard let index: StorageIndex = try self.indexHandler.getIndex(identifier) else {
+            throw LocalDiscStorageError.ItemNotFound;
+        }
+        
+        guard let original: StorageValue = try self.fileHandler.loadItem(withId: identifier, fromFile: index.file) else {
+            throw LocalDiscStorageError.ItemDoesNotExists;
+        }
+        
+        var newData: [String: Any] = original.storeValue;
+
+        // Add/replace.
+        for (key, value) in update {
+            newData[key] = value;
+        }
+        
+        let updatedEntity: StorageValue = StorageValue(identifier: identifier, storeValue: newData);
+        
+        try self.fileHandler.replaceItem(withId: identifier, withData: updatedEntity, inFile: index.file);
+    }
+    
     /// Private method to resolve to which file should new object be stored.
     ///
     /// - Returns: Returns name of a new or an existing file.
@@ -182,6 +211,8 @@ public class LocalDiscStorage {
 
 enum LocalDiscStorageError: Error {
     case DuplicateIdentifier;
+    case ItemDoesNotExists;
+    case ItemNotFound;
 }
 
 // todo: move to a separate file?

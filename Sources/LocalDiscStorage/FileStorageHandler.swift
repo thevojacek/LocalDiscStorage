@@ -22,7 +22,7 @@ class FileStorageHandler {
     public func saveTo (data: StorageValue, toFile fileName: String) throws -> Void {
 
         let filePath: String = "\(self.path)\(fileName)";
-        var fileContent: Array<StorageValue> = Array<StorageValue>()
+        var fileContent: Array<StorageValue> = Array<StorageValue>();
         
         if FileStorageHandler.fileExists(atPath: filePath) {
             fileContent = try self.loadFile(fileName);
@@ -91,6 +91,34 @@ class FileStorageHandler {
         fileContent = Array<StorageValue>();
         
         return loadedItem;
+    }
+    
+    /// Replaces an specified item in a file.
+    ///
+    /// - Parameters:
+    ///   - identifier: Identifier of an item to replace.
+    ///   - data: Data in form of "StorageValue" to replace the original data with.
+    ///   - fileName: Name of the file from which to load the item.
+    /// - Throws: Throws errors.
+    public func replaceItem (withId identifier: String, withData data: StorageValue, inFile fileName: String) throws -> Void {
+
+        let filePath: String = "\(self.path)\(fileName)";
+        var fileContent: Array<StorageValue> = Array<StorageValue>();
+        
+        if FileStorageHandler.fileExists(atPath: filePath) {
+            fileContent = try self.loadFile(fileName);
+        }
+        
+        guard let index: Int = (fileContent.index { (item) -> Bool in item.identifier == identifier }) else {
+            throw FileStorageError.ItemNotFound;
+        }
+        
+        fileContent[index] = data;
+        
+        try self.saveFile(withName: fileName, withContent: fileContent);
+        
+        // Reset fileContent for faster memory release.
+        fileContent = Array<StorageValue>();
     }
     
     private func loadFile (_ fileName: String) throws -> Array<StorageValue> {
@@ -184,4 +212,5 @@ enum FileStorageError: Error {
     case FileNotExists;
     case FileCouldNotBeLoaded;
     case FileCorrupted;
+    case ItemNotFound;
 }
